@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HANOI</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+        }
+
+        h1 {
+            text-align: center;
+        }
+
+        .inputArea {
+            display: flex;
+            justify-content: center;
+            margin-top: 10px;
+
+        }
+
+        .hanoiStep {
+            margin: auto;
+            border: 1px solid green;
+            width: 90%;
+            height: 200px;
+            display: flex;
+
+            
+            margin-top: 10px;
+        }
+
+        .top {
+            width: 33%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: end;
+            align-items: center;
+        }
+
+        .block {
+            width: 100%;
+            /*계산으로 조정*/
+            height: 30px;
+            border: 1px solid blue;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>HANOI TOWER</h1>
+    <div id="inputArea" class="inputArea">
+        <input id="floor" type="number" value="0">
+        <button id="drawButton" class="drawButton">DRAW</button>
+        <button id="resetButton" class="resetButton">RESET</button>
+    </div>
+    <div id="hanoiArea" class="hanoiArea">
+        
+    </div>
+
+    <script>
+        class Stack {
+            constructor(id) {
+                this.id = id;
+                this.storage = [];
+            }
+            insert(data) {
+                this.storage.push(data);
+            }
+            remove() {
+                return this.storage.pop();
+            }
+        }
+
+        const showDisplay = (floor ,start, middle, end) => {
+            let htmlString = "";
+            let cssString = "";
+
+            htmlString += `<div class="hanoiStep">`;
+            htmlString += `<div class="top">`;
+            start.storage.forEach((v, i) => {
+                htmlString += `<div class="block${i}"></div>`;
+            })
+            htmlString += `</div>`;
+            htmlString += `<div class="top">`;
+            middle.storage.forEach((v, i) => {
+                htmlString += `<div class="block${i}"></div>`;
+            })
+            htmlString += `</div>`;
+            htmlString += `<div class="top">`;
+            end.storage.forEach((v, i) => {
+                htmlString += `<div class="block${i}"></div>`;
+            })
+            htmlString += `</div>`;
+            htmlString += `</div>`;
+
+            for (let i=0; i<floor; i++) {
+                cssString += `
+                    .block${i} {
+                        width: ${80 - (floor - i)*7}%;
+                        height: 30px;
+
+                        background-color: ${i%2==0 ? "violet" : "indigo"};
+                    }
+                `;
+            }
+
+            return [htmlString, cssString];
+        }
+
+        const hanoiArea = document.getElementById("hanoiArea");
+        document.getElementById("drawButton").addEventListener("click", (e) => {
+            const hanoiFloor = Number(document.getElementById("floor").value);
+
+            const startStack = new Stack("start");
+            const middleStack = new Stack("middle");
+            const endStack = new Stack("end");
+
+            for (let i = 0; i < hanoiFloor; i++) {
+                startStack.insert(hanoiFloor - i);
+            }
+
+            let htmlString = ``;
+            let cssString = ``;
+
+            const displayForm = showDisplay(hanoiFloor, startStack, middleStack, endStack);
+            htmlString += displayForm[0];
+            cssString += displayForm[1]
+            
+
+            const hanoiTower = (floor = hanoiFloor, start = startStack, middle = middleStack, end = endStack) => {
+                if (floor === 1) {
+                    end.insert(start.remove());
+
+                    const displayForm = showDisplay(hanoiFloor, startStack, middleStack, endStack);
+                    htmlString += displayForm[0];
+                    cssString += displayForm[1]
+                    
+                } else {
+                    hanoiTower(floor - 1, start, end, middle);
+                    end.insert(start.remove());
+
+                    const displayForm = showDisplay(hanoiFloor, startStack, middleStack, endStack);
+                    htmlString += displayForm[0];
+                    cssString += displayForm[1]
+                    
+
+                    hanoiTower(floor - 1, middle, start, end);
+                }
+            }
+            hanoiTower();
+
+            hanoiArea.innerHTML = `
+                ${htmlString}
+                <style>${cssString}</style>
+            `;
+        });
+    </script>
+</body>
+
+</html>
